@@ -6,11 +6,16 @@ use rand::Rng;
 fn main() {
   let mut vector: Vec<i32> = vec![];
   let vec_length: i32 = parse_input_number("Input vec to sort length");
-  let range: [i32; 2] = [parse_input_number("Input min value"), parse_input_number("Input max value")];
+  let range: [i32; 2] = [
+    parse_input_number("Input min value"),
+    parse_input_number("Input max value"),
+  ];
 
   for _ in 0..vec_length {
     vector.push(rand::thread_rng().gen_range(range[0], range[1]));
   }
+
+  println!("\x1b[0;36mSorting...");
 
   let ans: Vec<i32> = bubble_sort_colored(vector);
 
@@ -42,7 +47,7 @@ fn bubble_sort_colored(n: Vec<i32>) -> Vec<i32> {
 
     println!("{}", colored_vec.join(", "));
 
-    wait("1");
+    wait(".1");
   }
 
   list

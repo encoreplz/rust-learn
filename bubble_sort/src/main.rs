@@ -3,6 +3,9 @@ use std::process::Command;
 
 use rand::Rng;
 
+const INSERTION: &str = "insertion";
+const BUBBLE: &str = "bubble";
+
 fn main() {
   let mut vector: Vec<i32> = vec![];
   let vec_length: i32 = parse_input_number("Input vec to sort length");
@@ -17,58 +20,56 @@ fn main() {
 
   println!("\x1b[0;36mSorting...");
 
-  let ans: Vec<i32> = bubble_sort_colored(vector);
-
-  println!("\x1b[0;36mSort finished: {:?}", ans);
+  println!("\x1b[0;36mSort finished: {:?}", sort_algorithm_aggregator(vector));
 }
 
-fn bubble_sort_colored(n: Vec<i32>) -> Vec<i32> {
-  let mut list = n;
+fn sort_algorithm_aggregator(list_to_sort: Vec<i32>) -> Vec<i32> {
+  let mut sort_algorithm = String::new();
+  println!("\x1b[0;36mChoose algorith to use ({:?})", vec![INSERTION, BUBBLE].join(" | "));
+  stdin().
+    read_line(&mut sort_algorithm)
+    .expect("Failed to read line");
+
+  match sort_algorithm.trim() {
+    BUBBLE => bubble_sort(list_to_sort),
+    INSERTION => insertion_sort(list_to_sort),
+    _ => list_to_sort,
+  }
+}
+
+fn bubble_sort(arr: Vec<i32>) -> Vec<i32> {
+  let mut list = arr;
   let mut i = 0;
   let mut j = 0;
 
   while i < list.len() {
     while j < list.len() {
       if list[i] > list[j] {
-        let tmp = list[i];
-        list[i] = list[j];
-        list[j] = tmp;
+        list.swap(i, j);
       }
       j += 1;
     }
     i += 1;
     j = i + 1;
-    let mut colored_vec: Vec<String> = vec![];
 
-    for elem in list.iter() {
-      let color = get_number_color(elem, &list);
-      colored_vec.push([color, elem.to_string()].concat());
-    };
-
-    println!("{}", colored_vec.join(", "));
-
-    wait(".1");
+    print_list_colored(&list);
+    wait("1");
   }
 
   list
 }
 
-fn bubble_sort(n: Vec<i32>) -> Vec<i32> {
-  let mut list = n;
-  let mut i = 0;
-  let mut j = 0;
+fn insertion_sort(arr: Vec<i32>) -> Vec<i32> {
+  let mut list = arr;
 
-  while i < list.len() {
-    while j < list.len() {
-      if list[i] > list[j] {
-        let tmp = list[i];
-        list[i] = list[j];
-        list[j] = tmp;
-      }
-      j += 1;
+  for i in 1..list.len() {
+    let mut j = i;
+    while j > 0 && list[j - 1] > list[j] {
+      list.swap(j - 1, j);
+      j -= 1;
     }
-    i += 1;
-    j = i + 1;
+    print_list_colored(&list);
+    wait("1");
   }
 
   list
@@ -84,16 +85,17 @@ fn wait(time: &str) {
 }
 
 fn parse_input_number(message: &str) -> i32 {
-  let mut buffer = String::new();
   let number: i32;
 
   println!("{}", message);
 
-  stdin()
-    .read_line(&mut buffer)
-    .expect("Failed to read line");
-
   loop {
+    let mut buffer = String::new();
+
+    stdin()
+      .read_line(&mut buffer)
+      .expect("Failed to read line");
+
     number = match buffer.trim().parse() {
       Ok(parsed_number) => parsed_number,
       Err(_) => {
@@ -109,11 +111,23 @@ fn parse_input_number(message: &str) -> i32 {
   number
 }
 
+fn print_list_colored(list:  &Vec<i32>) {
+  let mut colored_vec: Vec<String> = vec![];
+
+  for elem in list.iter() {
+    let color = get_number_color(elem, &list);
+    colored_vec.push([color, elem.to_string()].concat());
+  };
+
+  println!("{}", colored_vec.join(", "));
+}
+
 fn get_number_color(num: &i32, vector: &Vec<i32>) -> String {
-  let sorted_vec: Vec<i32> = bubble_sort(vector.clone());
+  let mut list: Vec<i32> = vector.clone();
+  list.sort();
   let mut color: String = String::from("Red");
 
-  for (index, vec_num) in sorted_vec.iter().enumerate() {
+  for (index, vec_num) in list.iter().enumerate() {
     if vec_num == num {
       let bigger_then = 100 * index / vector.len();
 
@@ -128,5 +142,6 @@ fn get_number_color(num: &i32, vector: &Vec<i32>) -> String {
       };
     }
   }
+
   color
 }
